@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SolarEase - Multi-State Solar Advisor</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e429f;
+      --secondary: #0e9f6e;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --gray: #64748b;
+      --light-gray: #e2e8f0;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 0;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: var(--gray);
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      padding: 30px;
+      margin-bottom: 30px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 i {
+      background: rgba(26, 86, 219, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label i {
+      color: var(--primary);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid var(--light-gray);
+      border-radius: 14px;
+      font-size: 1.1rem;
+      transition: var(--transition);
+      background: #f8fafc;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.15);
+    }
+
+    .btn {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: 600;
+      width: 100%;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 6px rgba(26, 86, 219, 0.2);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(26, 86, 219, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    #result {
+      display: none;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 25px 0;
+    }
+
+    .summary-item {
+      background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--light-gray);
+    }
+
+    .summary-label {
+      font-size: 0.95rem;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .eco-impact {
+      background: rgba(14, 159, 110, 0.08);
+      border-left: 4px solid var(--secondary);
+      border-radius: 0 12px 12px 0;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .eco-impact h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      color: var(--secondary);
+    }
+
+    .eco-impact ul {
+      list-style: none;
+      padding-left: 10px;
+    }
+
+    .eco-impact li {
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .eco-impact i {
+      color: var(--secondary);
+      background: rgba(14, 159, 110, 0.15);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tip-box {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 25px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .tip-box h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .savings-highlight {
+      background: linear-gradient(90deg, rgba(26, 86, 219, 0.1), rgba(14, 159, 110, 0.1));
+      padding: 25px;
+      border-radius: 16px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .savings-highlight h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: var(--primary-dark);
+    }
+
+    .savings-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .impact-comparison {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 25px 0;
+    }
+
+    .comparison-item {
+      text-align: center;
+      padding: 15px;
+      min-width: 120px;
+    }
+
+    .comparison-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .comparison-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .comparison-label {
+      font-size: 0.95rem;
+      color: var(--gray);
+    }
+
+    .location-info {
+      background: rgba(26, 86, 219, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      font-size: 0.95rem;
+    }
+
+    .location-info h4 {
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    .subsidy-highlight {
+      background: rgba(245, 158, 11, 0.15);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 15px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .card {
+        padding: 25px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-sun"></i> SolarEase India</h1>
+      <p class="subtitle">Solar Advisor for All States with Kerala District Cities</p>
+    </header>
+
+    <div class="card">
+      <h2><i class="fas fa-map-marker-alt"></i> Select Your Location</h2>
+      <div class="form-group">
+        <label for="location"><i class="fas fa-globe-asia"></i> Choose Your State/City:</label>
+        <select id="location">
+          <!-- States and cities will be populated by JavaScript -->
+        </select>
+        <div class="location-info">
+          <h4>Solar Potential in <span id="location-display">Kerala</span></h4>
+          <p id="location-details">Kerala offers excellent solar potential with 300+ sunny days annually. Average solar yield: 1300 kWh/kW/year.</p>
+        </div>
+      </div>
+
+      <h2><i class="fas fa-file-invoice-dollar"></i> Your Electricity Details</h2>
+      <div class="form-group">
+        <label for="units"><i class="fas fa-bolt"></i> Monthly Units Consumed (kWh):</label>
+        <input type="number" id="units" placeholder="e.g., 250" min="0" step="1">
+      </div>
+
+      <div class="form-group">
+        <label for="budget"><i class="fas fa-wallet"></i> Your Solar Budget (₹):</label>
+        <input type="number" id="budget" placeholder="e.g., 250000" min="0" step="1000">
+      </div>
+
+      <button class="btn" onclick="calculateSolar()">
+        <i class="fas fa-calculator"></i> Generate My Solar Plan
+      </button>
+    </div>
+
+    <div id="result" class="card">
+      <h2><i class="fas fa-chart-line"></i> Your Personalized Solar Plan</h2>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Location</div>
+          <div class="summary-value" id="location-name">Kerala</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Monthly Usage</div>
+          <div class="summary-value"><span id="usage"></span> kWh</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">System Size</div>
+          <div class="summary-value"><span id="size"></span> kW</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Panel Type</div>
+          <div class="summary-value"><span id="panel"></span></div>
+        </div>
+      </div>
+
+      <div class="savings-highlight">
+        <h3>Your 10-Year Financial Impact</h3>
+        <div class="savings-value">₹<span id="profit"></span></div>
+        <p>Net Savings After Initial Investment</p>
+      </div>
+
+      <div class="eco-impact">
+        <h3><i class="fas fa-leaf"></i> Annual Environmental Impact</h3>
+        <ul>
+          <li>
+            <i class="fas fa-smog"></i>
+            <div>
+              <strong>CO₂ Prevented:</strong> <span id="co2"></span> kg
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-tree"></i>
+            <div>
+              <strong>Equivalent to planting:</strong> <span id="trees"></span> trees
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-car"></i>
+            <div>
+              <strong>Same as not driving:</strong> <span id="km"></span> km
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="eco-impact">
+        <h3><i class="fas fa-globe-asia"></i> 10-Year Eco Impact</h3>
+        <ul>
+          <li>
+            <i class="fas fa-smog"></i>
+            <div>
+              <strong>Total CO₂ prevented:</strong> <span id="co2_10"></span> kg
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-tree"></i>
+            <div>
+              <strong>Trees saved:</strong> <span id="trees_10"></span>
+            </div>
+          </li>
+          <li>
+            <i class="fas fa-car"></i>
+            <div>
+              <strong>Like taking 1 car off the road for <span id="car_years"></span> years!</strong>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tip-box">
+        <h3><i class="fas fa-lightbulb"></i> Subsidy Information</h3>
+        <p id="subsidy-info">Kerala's "Soura" scheme offers subsidies up to ₹30,000 for residential solar installations.</p>
+        <div class="subsidy-highlight">
+          Potential Subsidy: ₹<span id="subsidy-amount">30,000</span>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>SolarEase India • Empowering Sustainable Energy Choices Across All States</p>
+    </footer>
+  </div>
+
+  <script>
+    // All Indian states with solar data
+    const INDIAN_STATES = {
+      "Andhra Pradesh": { solarYield: 1550, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 20000, subsidyInfo: "Andhra Pradesh offers subsidies up to ₹20,000 for residential solar installations." },
+      "Arunachal Pradesh": { solarYield: 1300, electricityCost: 5.50, co2PerKwh: 0.75, subsidy: 15000, subsidyInfo: "Arunachal Pradesh provides subsidies up to ₹15,000 for solar installations." },
+      "Assam": { solarYield: 1250, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 18000, subsidyInfo: "Assam offers subsidies up to ₹18,000 for residential solar systems." },
+      "Bihar": { solarYield: 1400, electricityCost: 6.50, co2PerKwh: 0.88, subsidy: 20000, subsidyInfo: "Bihar provides subsidies up to ₹20,000 for solar installations." },
+      "Chhattisgarh": { solarYield: 1500, electricityCost: 6.00, co2PerKwh: 0.85, subsidy: 22000, subsidyInfo: "Chhattisgarh offers subsidies up to ₹22,000 for residential solar systems." },
+      "Goa": { solarYield: 1450, electricityCost: 7.50, co2PerKwh: 0.80, subsidy: 25000, subsidyInfo: "Goa provides generous subsidies up to ₹25,000 for solar installations." },
+      "Gujarat": { solarYield: 1600, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 20000, subsidyInfo: "Gujarat's Surya Gujarat scheme offers subsidies up to ₹20,000." },
+      "Haryana": { solarYield: 1500, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 25000, subsidyInfo: "Haryana offers subsidies up to ₹25,000 for residential solar systems." },
+      "Himachal Pradesh": { solarYield: 1350, electricityCost: 6.50, co2PerKwh: 0.75, subsidy: 18000, subsidyInfo: "Himachal Pradesh provides subsidies up to ₹18,000 for solar installations." },
+      "Jharkhand": { solarYield: 1450, electricityCost: 6.50, co2PerKwh: 0.88, subsidy: 20000, subsidyInfo: "Jharkhand offers subsidies up to ₹20,000 for residential solar systems." },
+      "Karnataka": { solarYield: 1500, electricityCost: 7.50, co2PerKwh: 0.84, subsidy: 25000, subsidyInfo: "Karnataka's Surya Karnataka scheme offers subsidies up to ₹25,000." },
+      "Kerala": { solarYield: 1300, electricityCost: 6.50, co2PerKwh: 0.82, subsidy: 30000, subsidyInfo: "Kerala's \"Soura\" scheme offers subsidies up to ₹30,000 for residential solar installations." },
+      "Madhya Pradesh": { solarYield: 1550, electricityCost: 6.50, co2PerKwh: 0.85, subsidy: 22000, subsidyInfo: "Madhya Pradesh provides subsidies up to ₹22,000 for solar installations." },
+      "Maharashtra": { solarYield: 1400, electricityCost: 8.00, co2PerKwh: 0.88, subsidy: 15000, subsidyInfo: "Maharashtra's MahaSolar initiative offers subsidies up to ₹15,000." },
+      "Manipur": { solarYield: 1250, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 15000, subsidyInfo: "Manipur offers subsidies up to ₹15,000 for residential solar systems." },
+      "Meghalaya": { solarYield: 1200, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 15000, subsidyInfo: "Meghalaya provides subsidies up to ₹15,000 for solar installations." },
+      "Mizoram": { solarYield: 1250, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 15000, subsidyInfo: "Mizoram offers subsidies up to ₹15,000 for residential solar systems." },
+      "Nagaland": { solarYield: 1300, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 15000, subsidyInfo: "Nagaland provides subsidies up to ₹15,000 for solar installations." },
+      "Odisha": { solarYield: 1450, electricityCost: 6.50, co2PerKwh: 0.85, subsidy: 20000, subsidyInfo: "Odisha offers subsidies up to ₹20,000 for residential solar systems." },
+      "Punjab": { solarYield: 1450, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 20000, subsidyInfo: "Punjab provides subsidies up to ₹20,000 for solar installations." },
+      "Rajasthan": { solarYield: 1700, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 25000, subsidyInfo: "Rajasthan offers generous subsidies up to ₹25,000 for residential solar systems." },
+      "Sikkim": { solarYield: 1300, electricityCost: 5.50, co2PerKwh: 0.75, subsidy: 15000, subsidyInfo: "Sikkim provides subsidies up to ₹15,000 for solar installations." },
+      "Tamil Nadu": { solarYield: 1450, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 20000, subsidyInfo: "Tamil Nadu's CM Solar Scheme offers subsidies up to ₹20,000." },
+      "Telangana": { solarYield: 1500, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 20000, subsidyInfo: "Telangana provides subsidies up to ₹20,000 for residential solar systems." },
+      "Tripura": { solarYield: 1250, electricityCost: 6.00, co2PerKwh: 0.80, subsidy: 15000, subsidyInfo: "Tripura offers subsidies up to ₹15,000 for solar installations." },
+      "Uttar Pradesh": { solarYield: 1450, electricityCost: 7.00, co2PerKwh: 0.88, subsidy: 20000, subsidyInfo: "Uttar Pradesh provides subsidies up to ₹20,000 for residential solar systems." },
+      "Uttarakhand": { solarYield: 1400, electricityCost: 6.50, co2PerKwh: 0.80, subsidy: 18000, subsidyInfo: "Uttarakhand offers subsidies up to ₹18,000 for solar installations." },
+      "West Bengal": { solarYield: 1350, electricityCost: 7.00, co2PerKwh: 0.85, subsidy: 20000, subsidyInfo: "West Bengal provides subsidies up to ₹20,000 for residential solar systems." },
+      "Delhi": { solarYield: 1400, electricityCost: 8.50, co2PerKwh: 0.90, subsidy: 60000, subsidyInfo: "Delhi's Solar Rooftop Scheme offers the highest subsidy in India - up to ₹60,000." }
+    };
+
+    // Only the 14 main district cities of Kerala
+    const KERALA_MAIN_CITIES = [
+      { name: "Thiruvananthapuram", solarYield: 1300 },
+      { name: "Kollam", solarYield: 1290 },
+      { name: "Pathanamthitta", solarYield: 1280 },
+      { name: "Alappuzha", solarYield: 1270 },
+      { name: "Kottayam", solarYield: 1280 },
+      { name: "Idukki", solarYield: 1250 },
+      { name: "Ernakulam", solarYield: 1310 },
+      { name: "Thrissur", solarYield: 1300 },
+      { name: "Palakkad", solarYield: 1330 },
+      { name: "Malappuram", solarYield: 1320 },
+      { name: "Kozhikode", solarYield: 1310 },
+      { name: "Wayanad", solarYield: 1290 },
+      { name: "Kannur", solarYield: 1300 },
+      { name: "Kasaragod", solarYield: 1310 }
+    ];
+
+    // Panel options: [name, cost_per_kw]
+    const PANELS = [
+      ["Polycrystalline", 45000],
+      ["Monocrystalline", 55000],
+      ["Thin Film", 40000] // Best for Kerala!
+    ];
+
+    // Environmental constants
+    const CO2_PER_TREE = 22;         // kg CO2 absorbed per tree per year
+    const KM_PER_LITRE = 15;
+    const CO2_PER_LITRE = 2.3;
+
+    // Populate states and Kerala cities dropdown
+    function populateLocations() {
+      const locationSelect = document.getElementById('location');
+
+      // Add a default option
+      const defaultOption = document.createElement('option');
+      defaultOption.value = "";
+      defaultOption.textContent = "Select your state or city";
+      defaultOption.disabled = true;
+      defaultOption.selected = true;
+      locationSelect.appendChild(defaultOption);
+
+      // Add all states except Kerala
+      for (const state of Object.keys(INDIAN_STATES)) {
+        if (state !== "Kerala") {
+          const option = document.createElement('option');
+          option.value = `state|${state}`;
+          option.textContent = state;
+          option.dataset.solarYield = INDIAN_STATES[state].solarYield;
+          option.dataset.electricityCost = INDIAN_STATES[state].electricityCost;
+          option.dataset.co2PerKwh = INDIAN_STATES[state].co2PerKwh;
+          option.dataset.subsidy = INDIAN_STATES[state].subsidy;
+          option.dataset.subsidyInfo = INDIAN_STATES[state].subsidyInfo;
+          locationSelect.appendChild(option);
+        }
+      }
+
+      // Add Kerala state option
+      const keralaStateOption = document.createElement('option');
+      keralaStateOption.value = "state|Kerala";
+      keralaStateOption.textContent = "Kerala (State Level)";
+      keralaStateOption.dataset.solarYield = INDIAN_STATES["Kerala"].solarYield;
+      keralaStateOption.dataset.electricityCost = INDIAN_STATES["Kerala"].electricityCost;
+      keralaStateOption.dataset.co2PerKwh = INDIAN_STATES["Kerala"].co2PerKwh;
+      keralaStateOption.dataset.subsidy = INDIAN_STATES["Kerala"].subsidy;
+      keralaStateOption.dataset.subsidyInfo = INDIAN_STATES["Kerala"].subsidyInfo;
+      locationSelect.appendChild(keralaStateOption);
+
+      // Add a separator
+      const separator = document.createElement('option');
+      separator.disabled = true;
+      separator.textContent = "────────── Kerala Cities ──────────";
+      locationSelect.appendChild(separator);
+
+      // Add only the 14 main district cities of Kerala
+      KERALA_MAIN_CITIES.forEach(city => {
+        const option = document.createElement('option');
+        option.value = `city|Kerala|${city.name}`;
+        option.textContent = city.name;
+        option.dataset.solarYield = city.solarYield;
+        option.dataset.electricityCost = INDIAN_STATES["Kerala"].electricityCost;
+        option.dataset.co2PerKwh = INDIAN_STATES["Kerala"].co2PerKwh;
+        option.dataset.subsidy = INDIAN_STATES["Kerala"].subsidy;
+        option.dataset.subsidyInfo = INDIAN_STATES["Kerala"].subsidyInfo;
+        locationSelect.appendChild(option);
+      });
+
+      // Set initial location details (Kerala)
+      updateLocationDetails("Kerala", INDIAN_STATES["Kerala"]);
+    }
+
+    // Update location details when selection changes
+    document.getElementById('location').addEventListener('change', function() {
+      const selection = this.value;
+      if (!selection) return;
+
+      const parts = selection.split('|');
+      const type = parts[0];
+
+      if (type === "city") {
+        // It's a Kerala city
+        const cityName = parts[2];
+        const cityData = {
+          solarYield: parseFloat(this.selectedOptions[0].dataset.solarYield),
+          electricityCost: parseFloat(this.selectedOptions[0].dataset.electricityCost),
+          co2PerKwh: parseFloat(this.selectedOptions[0].dataset.co2PerKwh),
+          subsidy: parseInt(this.selectedOptions[0].dataset.subsidy),
+          subsidyInfo: this.selectedOptions[0].dataset.subsidyInfo
+        };
+        updateLocationDetails(cityName, cityData);
+      } else if (type === "state") {
+        // It's a state
+        const stateName = parts[1];
+        const stateData = INDIAN_STATES[stateName];
+        updateLocationDetails(stateName, stateData);
+      }
+    });
+
+    function updateLocationDetails(locationName, data) {
+      document.getElementById('location-display').textContent = locationName;
+      document.getElementById('location-details').textContent =
+        `${locationName} offers excellent solar potential with 300+ sunny days annually. Average solar yield: ${data.solarYield} kWh/kW/year.`;
+    }
+
+    function calculateSolar() {
+      // Get user input
+      const selection = document.getElementById("location").value;
+      const units = parseFloat(document.getElementById("units").value);
+      const budget = parseFloat(document.getElementById("budget").value);
+
+      if (!selection) {
+        alert("Please select your state or city!");
+        return;
+      }
+
+      let locationData;
+      let locationName;
+
+      const parts = selection.split('|');
+      const type = parts[0];
+
+      if (type === "city") {
+        // It's a Kerala city
+        locationName = parts[2];
+        locationData = {
+          solarYield: parseFloat(document.getElementById("location").selectedOptions[0].dataset.solarYield),
+          electricityCost: parseFloat(document.getElementById("location").selectedOptions[0].dataset.electricityCost),
+          co2PerKwh: parseFloat(document.getElementById("location").selectedOptions[0].dataset.co2PerKwh),
+          subsidy: parseInt(document.getElementById("location").selectedOptions[0].dataset.subsidy),
+          subsidyInfo: document.getElementById("location").selectedOptions[0].dataset.subsidyInfo
+        };
+      } else if (type === "state") {
+        // It's a state
+        locationName = parts[1];
+        locationData = INDIAN_STATES[locationName];
+      }
+
+      if (isNaN(units) || isNaN(budget) || units <= 0 || budget <= 0) {
+        alert("Please enter valid numbers!");
+        return;
+      }
+
+      // Step 1: Calculate system size
+      const annualUsage = units * 12;
+      const requiredKW = Math.round((annualUsage / locationData.solarYield) * 100) / 100; // Round to 2 decimals
+
+      // Step 2: Recommend panel (prefer Thin Film for Kerala if affordable)
+      let recommendedPanel = "Thin Film";
+      let panelCost = 40000;
+
+      // Check if Thin Film fits budget
+      if (requiredKW * 40000 > budget) {
+        // Try cheapest
+        if (requiredKW * 45000 <= budget) {
+          recommendedPanel = "Polycrystalline";
+          panelCost = 45000;
+        } else {
+          recommendedPanel = "Monocrystalline (partial)";
+          panelCost = 55000;
+          // Adjust system size to fit budget
+          // (For simplicity, we keep size but note it's partial)
+        }
+      }
+
+      // Step 3: Financials
+      const totalCost = Math.round(requiredKW * panelCost);
+      const annualEnergy = requiredKW * locationData.solarYield;
+      const annualSavings = Math.round(annualEnergy * locationData.electricityCost);
+      const paybackYears = (totalCost / annualSavings).toFixed(1);
+      const profit10 = Math.round(annualSavings * 10 - totalCost);
+
+      // Step 4: Environmental impact
+      const co2Saved = Math.round(annualEnergy * locationData.co2PerKwh);
+      const trees = Math.round(co2Saved / CO2_PER_TREE);
+      const kmAvoided = Math.round((co2Saved / CO2_PER_LITRE) * KM_PER_LITRE);
+
+      // Step 5: Update webpage
+      document.getElementById("location-name").textContent = locationName;
+      document.getElementById("usage").textContent = units;
+      document.getElementById("panel").textContent = recommendedPanel;
+      document.getElementById("size").textContent = requiredKW;
+      document.getElementById("profit").textContent = profit10.toLocaleString();
+      document.getElementById("subsidy-amount").textContent = locationData.subsidy.toLocaleString();
+      document.getElementById("subsidy-info").textContent = locationData.subsidyInfo;
+
+      document.getElementById("co2").textContent = co2Saved.toLocaleString();
+      document.getElementById("trees").textContent = trees;
+      document.getElementById("km").textContent = kmAvoided.toLocaleString();
+
+      document.getElementById("co2_10").textContent = (co2Saved * 10).toLocaleString();
+      document.getElementById("trees_10").textContent = trees * 10;
+      document.getElementById("car_years").textContent = ((kmAvoided * 10) / 15000).toFixed(1);
+
+      // Show result
+      document.getElementById("result").style.display = "block";
+
+      // Scroll to results
+      document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', populateLocations);
+  </script>
+</body>
+</html>
